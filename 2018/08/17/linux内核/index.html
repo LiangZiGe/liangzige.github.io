@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux笔记," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="良子" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="guojing linux学习笔记整理一个目录，方便学习查阅。 1.写在开始2.堆3.内核4.内核的体系结构5.LRU6.Unix文件系统7.红黑树8.进程地址空间9.进程内核模式10.可重入内核11.内核一致性12.进程间的通信13.僵尸进程14.内存管理15.进程、轻量级进程和线程16.进程描述符17.进程优先级18.进程生命周期19.进程类型和命名空间20.标识进程21.进程链表22.进程之">
+<meta name="keywords" content="linux笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux内核">
+<meta property="og:url" content="http://memeory.me/2018/08/17/linux内核/index.html">
+<meta property="og:site_name" content="良子">
+<meta property="og:description" content="guojing linux学习笔记整理一个目录，方便学习查阅。 1.写在开始2.堆3.内核4.内核的体系结构5.LRU6.Unix文件系统7.红黑树8.进程地址空间9.进程内核模式10.可重入内核11.内核一致性12.进程间的通信13.僵尸进程14.内存管理15.进程、轻量级进程和线程16.进程描述符17.进程优先级18.进程生命周期19.进程类型和命名空间20.标识进程21.进程链表22.进程之">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-17T07:33:46.285Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux内核">
+<meta name="twitter:description" content="guojing linux学习笔记整理一个目录，方便学习查阅。 1.写在开始2.堆3.内核4.内核的体系结构5.LRU6.Unix文件系统7.红黑树8.进程地址空间9.进程内核模式10.可重入内核11.内核一致性12.进程间的通信13.僵尸进程14.内存管理15.进程、轻量级进程和线程16.进程描述符17.进程优先级18.进程生命周期19.进程类型和命名空间20.标识进程21.进程链表22.进程之">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://memeory.me/2018/08/17/linux内核/"/>
+
+
+
+
+
+  <title>linux内核 | 良子</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?657de5d711d64cd64293494d11a82661";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">良子</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://memeory.me/2018/08/17/linux内核/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiangZ">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="良子">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">linux内核</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-17T13:54:00+08:00">
+                2018-08-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">linux笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/17/linux内核/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2018/08/17/linux内核/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>guojing linux学习笔记整理一个目录，方便学习查阅。</p>
+<p><a href="http://guojing.me/linux-kernel-architecture/posts/start/" target="_blank" rel="noopener">1.写在开始</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/heap/" target="_blank" rel="noopener">2.堆</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/how-kernel-work/" target="_blank" rel="noopener">3.内核</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/parts-of-kernel/" target="_blank" rel="noopener">4.内核的体系结构</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/lru/" target="_blank" rel="noopener">5.LRU</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/what-is-file" target="_blank" rel="noopener">6.Unix文件系统</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/red-and-black-tree-with-c-code" target="_blank" rel="noopener">7.红黑树</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/task-size" target="_blank" rel="noopener">8.进程地址空间</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/progress-model" target="_blank" rel="noopener">9.进程内核模式</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/reentrant-kernel" target="_blank" rel="noopener">10.可重入内核</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/consistent-of-kernel" target="_blank" rel="noopener">11.内核一致性</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/signal" target="_blank" rel="noopener">12.进程间的通信</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/zombie-process" target="_blank" rel="noopener">13.僵尸进程</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/mm-management" target="_blank" rel="noopener">14.内存管理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process" target="_blank" rel="noopener">15.进程、轻量级进程和线程</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-descriptor" target="_blank" rel="noopener">16.进程描述符</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-priority" target="_blank" rel="noopener">17.进程优先级</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-life" target="_blank" rel="noopener">18.进程生命周期</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-type-and-namespace" target="_blank" rel="noopener">19.进程类型和命名空间</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/one-process" target="_blank" rel="noopener">20.标识进程</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-list" target="_blank" rel="noopener">21.进程链表</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-relationship" target="_blank" rel="noopener">22.进程之间的关系</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-waiting-link-list" target="_blank" rel="noopener">23.组织进程</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/the-kernel-thread" target="_blank" rel="noopener">24.内核线程</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/clone-fork-and-vfork" target="_blank" rel="noopener">25.进程复制</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/execve-replace-process" target="_blank" rel="noopener">26.进程替换</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/group-exit-and-do-exit-a-process" target="_blank" rel="noopener">27.进程退出</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/process-switch" target="_blank" rel="noopener">28.进程切换</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/memory-address" target="_blank" rel="noopener">29.内存地址</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/segment-selector" target="_blank" rel="noopener">30.段选择符和段寄存器</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/segment-descriptor" target="_blank" rel="noopener">31.段描述符</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/visit-segment-descriptor" target="_blank" rel="noopener">32.访问段描述符及分段单元</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/segment-in-linux" target="_blank" rel="noopener">33.Linux中的分段</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/system-paging-unit" target="_blank" rel="noopener">34.硬件中的分页</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/pae" target="_blank" rel="noopener">35.扩展分页PAE机制</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/system-hardware-cache-and-tlb" target="_blank" rel="noopener">36.硬件高速缓存和TLB</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/linux-paging" target="_blank" rel="noopener">37.Linux中的分页</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/page-and-page-descriptor" target="_blank" rel="noopener">38.页及其描述符</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/physical-memory" target="_blank" rel="noopener">39.物理内存布局</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/thread-page-table-and-kernel-page-table" target="_blank" rel="noopener">40.进程页表页和内核页表</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/pglist-data-and-zone" target="_blank" rel="noopener">41.内存管理区</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/page-and-page-table" target="_blank" rel="noopener">42.页表的数据结构</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/page-frame-allocator" target="_blank" rel="noopener">43.分区页框分配器</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/highmem" target="_blank" rel="noopener">44.高端内存页框的内核映射</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/init-mm-management" target="_blank" rel="noopener">45.初始化内存管理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/interrupt" target="_blank" rel="noopener">46.中断和异常</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/kernel-preemption" target="_blank" rel="noopener">47.内核抢占</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/per-cpu" target="_blank" rel="noopener">48.per-CPU变量</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/timing-measurement" target="_blank" rel="noopener">49.定时测量</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/atomic-operations" target="_blank" rel="noopener">50.原子操作</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/time-system" target="_blank" rel="noopener">51.时钟和定时器电路</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/memory-barrier" target="_blank" rel="noopener">52.优化和内存屏障</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/timing-in-linux" target="_blank" rel="noopener">53.Linux计时体系结构</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/buddy-system-struct" target="_blank" rel="noopener">54.伙伴系统的结构</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/memory-fragmentation" target="_blank" rel="noopener">55.内存碎片</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/spin-lock" target="_blank" rel="noopener">56.自旋锁</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/init-mm-zone-and-page" target="_blank" rel="noopener">57.初始化内存域和结点</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/irq-and-interrupt" target="_blank" rel="noopener">58.IRQ和中断</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/read-and-write-spin-lock" target="_blank" rel="noopener">59.读/写自旋锁</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/alloc-page" target="_blank" rel="noopener">60.分配页</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/exception" target="_blank" rel="noopener">61.异常定义</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/interrupt-descriptor-table" target="_blank" rel="noopener">62.中断描述符表</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/seqlock" target="_blank" rel="noopener">63.顺序锁</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/loop-interrupt" target="_blank" rel="noopener">64.处理程序的嵌套执行</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/mm-release" target="_blank" rel="noopener">65.释放页</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/read-copy-update" target="_blank" rel="noopener">66.读-拷贝-更新</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/working-on-exception" target="_blank" rel="noopener">67.异常处理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/kernel-semaphore" target="_blank" rel="noopener">68.内核信号量</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/vmalloc" target="_blank" rel="noopener">69.不连续页的分配</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/working-on-interrupt" target="_blank" rel="noopener">70.中断处理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/io-interrupt-and-data-struct" target="_blank" rel="noopener">71.I/O中断处理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/io-interrupt-dynamic" target="_blank" rel="noopener">72.动态分配IRQ线</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/multi-cpu-interrupt" target="_blank" rel="noopener">73.处理器间中断处理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/slab" target="_blank" rel="noopener">74.slab分配器</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/soft-irq-and-tasklet" target="_blank" rel="noopener">75.软中断和tasklet</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/kernel-mm-management" target="_blank" rel="noopener">76.内核中的内存管理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/soft-irq" target="_blank" rel="noopener">77.软中断</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/how-slab-work" target="_blank" rel="noopener">78.slab分配的原理</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/soft-irq-daemon-ksoftirqd" target="_blank" rel="noopener">79.软中断守护进程</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/tasklet" target="_blank" rel="noopener">80.tasklet</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/slab-structure" target="_blank" rel="noopener">81.slab数据结构</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/wait-queue" target="_blank" rel="noopener">82.等待队列</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/completion" target="_blank" rel="noopener">83.完成量</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/init-slab" target="_blank" rel="noopener">84.slab初始化</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/virtual-filesystem" target="_blank" rel="noopener">85.虚拟文件系统</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/common-file-model" target="_blank" rel="noopener">86.通用文件模型</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/create-slab" target="_blank" rel="noopener">87.slab创建</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/vfs-system-interfaces" target="_blank" rel="noopener">88.VFS相关的系统调用</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/work-queue" target="_blank" rel="noopener">89.工作队列</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/return-from-interrupt-or-exception" target="_blank" rel="noopener">90.从中断和异常返回</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/slab-alloc" target="_blank" rel="noopener">91.slab分配</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/super-block-object" target="_blank" rel="noopener">92.超级块对象</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/inode-object" target="_blank" rel="noopener">93.索引节点对象</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/slab-free" target="_blank" rel="noopener">94.slab释放</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/file-object" target="_blank" rel="noopener">95.文件对象</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/dentry-object" target="_blank" rel="noopener">96.目录项对象</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/dentry-cache" target="_blank" rel="noopener">97.目录项高速缓存</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/special-filesystem" target="_blank" rel="noopener">98.特殊文件系统</a><br><br><a href="http://guojing.me/linux-kernel-architecture/posts/" target="_blank" rel="noopener">99.文件系统处理</a><br></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux笔记/" rel="tag"># linux笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/28/符号扩展纠结/" rel="next" title="符号位扩展纠结">
+                <i class="fa fa-chevron-left"></i> 符号位扩展纠结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="2018/08/17/linux内核/"
+           data-title="linux内核" data-url="http://memeory.me/2018/08/17/linux内核/">
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.png"
+                alt="LiangZ" />
+            
+              <p class="site-author-name" itemprop="name">LiangZ</p>
+              <p class="site-description motion-element" itemprop="description">写写代码看看书</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LiangZiGe" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LiangZ</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"memeory"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
